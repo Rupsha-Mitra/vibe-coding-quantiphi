@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Devfolio - GitHub developer portfolio</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="/" aria-label="devfolio home">devfolio<span class="cursor" aria-hidden="true">_</span></a>
+  <form id="searchForm" class="search" autocomplete="off">
+    <label class="sr" for="username">GitHub username</label>
+    <div class="prompt-input">
+      <span class="ps1" aria-hidden="true">$ gh user</span>
+      <input id="username" name="username" placeholder="torvalds" spellcheck="false" maxlength="39">
+    </div>
+    <button type="submit" class="btn primary">Load profile</button>
+    <button type="button" id="demoBtn" class="btn ghost">Try demo data</button>
+  </form>
+  <div class="top-actions">
+    <button id="refreshBtn" class="btn ghost" type="button" hidden>Refresh from GitHub</button>
+    <button id="settingsBtn" class="btn ghost" type="button">Settings</button>
+  </div>
+</header>
+
+<div id="statusbar" class="status" hidden role="status"></div>
+
+<main>
+  <section id="state" class="state" role="status" aria-live="polite">
+    <h1>Turn your GitHub history into a personal brand page</h1>
+    <p>Enter a username to see a contribution heatmap, repo highlights, top languages and a stack match against any job description.</p>
+  </section>
+
+  <div id="app" hidden>
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-head">
+        <div class="avatar-wrap"><img id="avatar" class="avatar" alt="" width="76" height="76"></div>
+        <div class="who">
+          <h1 id="heroTitle"></h1>
+          <p id="bio" class="bio"></p>
+          <p id="meta" class="meta"></p>
+        </div>
+        <a id="matchBadge" class="match-badge" href="#vibe"></a>
+      </div>
+
+      <div class="win heat-wrap">
+        <div class="win-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="path" aria-hidden="true">~/activity</span></div>
+        <div class="win-body">
+          <div class="heat-top">
+            <h2><span id="totalContribs"></span> contributions in the last year</h2>
+            <p id="heatSource" class="note"></p>
+          </div>
+          <div class="heat-scroll"><svg id="heatmap" role="img" aria-label="Contribution heatmap"></svg></div>
+          <div class="heat-foot">
+            <div class="legend" aria-hidden="true">Less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More</div>
+          </div>
+          <dl class="streaks" id="streaks"></dl>
+        </div>
+        <div class="scan" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <aside class="rail">
+        <section class="win" aria-labelledby="statsTitle">
+          <div class="win-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="path" aria-hidden="true">~/profile</span></div>
+          <div class="win-body">
+            <h2 id="statsTitle">Profile summary</h2>
+            <dl class="facts" id="facts"></dl>
+          </div>
+        </section>
+        <section class="win" aria-labelledby="langTitle">
+          <div class="win-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="path" aria-hidden="true">~/languages</span></div>
+          <div class="win-body">
+            <h2 id="langTitle">Top languages</h2>
+            <div class="donut-row">
+              <div class="donut-box"><svg id="donut" viewBox="0 0 42 42" role="img" aria-label="Top languages pie chart"></svg><div class="donut-hole" id="donutHole"></div></div>
+              <ul id="langLegend" class="lang-legend"></ul>
+            </div>
+          </div>
+        </section>
+        <section class="win" aria-labelledby="personaTitle">
+          <div class="win-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="path" aria-hidden="true">~/persona</span></div>
+          <div class="win-body">
+            <h2 id="personaTitle">Developer persona</h2>
+            <p id="personaName" class="persona-name"></p>
+            <p id="personaBlurb" class="note"></p>
+            <ul id="achievements" class="achievements"></ul>
+          </div>
+        </section>
+        <section class="win" aria-labelledby="embedTitle">
+          <div class="win-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="path" aria-hidden="true">~/badges</span></div>
+          <div class="win-body">
+            <h2 id="embedTitle">Badges for your README</h2>
+            <p class="note">Paste these into any README. They update from the cached data.</p>
+            <div id="embeds"></div>
+          </div>
+        </section>
+      </aside>
+
+      <div class="content">
+        <section id="vibe" class="win vibe" aria-labelledby="vibeTitle">
+          <div class="win-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="path" aria-hidden="true">~/stack-match</span></div>
+          <div class="win-body">
+            <h2 id="vibeTitle">Tech stack compatibility</h2>
+            <p class="note">Paste a job description. Keywords are compared with the languages, topics and descriptions in your cached repos.</p>
+            <label class="sr" for="jd">Job description</label>
+            <textarea id="jd" rows="6" placeholder="Paste the job description here..."></textarea>
+            <div class="row">
+              <button id="matchBtn" class="btn run" type="button"><span class="run-ico" aria-hidden="true">&#9654;</span><span class="run-label">Run stack match</span></button>
+              <button id="clearJd" class="btn ghost" type="button">Clear</button>
+              <span id="matchMsg" class="note" role="status"></span>
+            </div>
+            <div id="matchResult" hidden></div>
+          </div>
+        </section>
+
+        <section aria-labelledby="repoTitle">
+          <div class="repo-bar">
+            <h2 id="repoTitle">Repositories</h2>
+            <div class="filters">
+              <label>Sort <select id="sortBy"><option value="stars">Most stars</option><option value="forks">Most forks</option><option value="updated">Recently pushed</option></select></label>
+              <label>Language <select id="langFilter"><option value="">All</option></select></label>
+              <label class="check"><input type="checkbox" id="hideForks" checked> Hide forks</label>
+            </div>
+          </div>
+          <div id="repos" class="repos"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="tip" class="tip" hidden></div>
+
+<dialog id="settingsDlg">
+  <form method="dialog" id="settingsForm">
+    <h2>Settings</h2>
+    <label>Default username
+      <input id="setUser" maxlength="39" spellcheck="false">
+    </label>
+    <label>Cache lifetime (minutes)
+      <input id="setTtl" type="number" min="1" max="1440">
+    </label>
+    <p class="note">Settings and cached GitHub data are stored in a local SQLite database.</p>
+    <div class="row">
+      <button type="button" id="clearCacheBtn" class="btn ghost">Clear cached data</button>
+      <span class="spacer"></span>
+      <button type="button" id="cancelSettings" class="btn ghost">Cancel</button>
+      <button type="submit" class="btn primary" value="save">Save settings</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
